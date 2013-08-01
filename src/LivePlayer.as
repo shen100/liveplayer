@@ -1,10 +1,10 @@
 package 
 {	
-	import com.shen.live.ApplicationFacade;
-	import com.shen.live.managers.MouseSleepManager;
-	import com.shen.live.events.MouseSleepEvent;
-	import com.shen.live.view.ui.control.ControlBar;
-	import com.shen.live.view.ui.video.VideoBox;
+	import com.shen100.live.ApplicationFacade;
+	import com.shen100.live.events.MouseSleepEvent;
+	import com.shen100.live.managers.MouseSleepManager;
+	import com.shen100.live.view.ui.control.ControlBar;
+	import com.shen100.live.view.ui.video.VideoBox;
 	
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
