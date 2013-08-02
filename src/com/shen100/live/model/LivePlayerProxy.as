@@ -29,7 +29,7 @@ package com.shen100.live.model {
 		private static const PLAYER_NAME:String 	= "LivePlayer";
 		private static const MAJOR:int 				= 1;
 		private static const MINOR:int 				= 1;
-		private static const REVISION:int 			= 5;
+		private static const REVISION:int 			= 6;
 		
 		public var debugServerUrl:String;
 		public var channel:String;	//频道id
@@ -98,6 +98,7 @@ package com.shen100.live.model {
 		}
 		
 		public function play():void {
+			playerState = PlayerState.PLAYING;
 			disconnect();
 			connect();	
 		}
@@ -154,6 +155,9 @@ package com.shen100.live.model {
 					_netStream.addEventListener(NetStatusEvent.NET_STATUS, onStreamStatus);
 					_timeoutId = setTimeout(reconnect, _timeoutTime);
 					_netStream.play(streamPath);
+					if(playerState == PlayerState.PAUSE) {
+						_netStream.pause();		
+					}
 					sendNotification(LivePlayerProxy.VIDEO_CONNECT_SUCCESS);
 					break;	
 				}
@@ -199,10 +203,12 @@ package com.shen100.live.model {
 		}
 
 		public function pause():void {
+			playerState = PlayerState.PAUSE;
 			_netStream.pause();	
 		}
 		
 		public function resume():void {
+			playerState = PlayerState.PLAYING;
 			_netStream.resume();
 		}
 		
