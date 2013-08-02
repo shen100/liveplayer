@@ -1,10 +1,10 @@
 package com.shen100.live.view
 {	
+	import com.shen.uicomps.components.ToggleButton;
 	import com.shen100.live.ApplicationFacade;
 	import com.shen100.live.model.LivePlayerProxy;
 	import com.shen100.live.view.ui.control.ControlBar;
 	import com.shen100.live.view.ui.control.VolumeBox;
-	import com.shen.uicomps.components.ToggleButton;
 	
 	import flash.display.StageDisplayState;
 	import flash.events.Event;
@@ -26,12 +26,12 @@ package com.shen100.live.view
 		override public function onRegister():void {
 			playerProxy = facade.retrieveProxy(LivePlayerProxy.NAME) as LivePlayerProxy;
 			controlBar.volumeBox.value = playerProxy.volume;
-			controlBar.playOrPause.addEventListener(ToggleButton.TOGGLE, 			onPlayOrPauseClick);
+			controlBar.playOrPause.addEventListener(ToggleButton.TOGGLE, 			onPlayOrPauseToggle);
 			controlBar.volumeBox.addEventListener(VolumeBox.VOLUME_CHANGED, 		onChangeVolume);
-			controlBar.enterOrExitFullScreen.addEventListener(ToggleButton.TOGGLE, 	onFullScreenClick);
+			controlBar.enterOrExitFullScreen.addEventListener(ToggleButton.TOGGLE, 	onFullScreenToggle);
 		}
 		
-		private function onPlayOrPauseClick(event:Event):void {
+		private function onPlayOrPauseToggle(event:Event):void {
 			if(controlBar.playOrPause.isOn) {
 				sendNotification(ApplicationFacade.PAUSE);	
 			}else {
@@ -39,7 +39,7 @@ package com.shen100.live.view
 			}
 		}
 	
-		private function onFullScreenClick(event:Event):void {
+		private function onFullScreenToggle(event:Event):void {
 			if(controlBar.stage.displayState == StageDisplayState.FULL_SCREEN) {
 				controlBar.stage.displayState = StageDisplayState.NORMAL;
 			}else {

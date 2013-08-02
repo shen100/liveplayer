@@ -14,9 +14,8 @@ package com.shen100.live.view.ui.video
 		private var bgColor:uint = 0x000000;
 		private var bg:Shape;
 		private var _video:Video;
-		private var _videoSize:Size;
+		private var _metaDataVideoSize:Size;
 		private var _videoScaleMode:String;
-		private var netStream:NetStream;
 		
 		public function VideoBox() {
 			bg = new Shape();
@@ -27,12 +26,12 @@ package com.shen100.live.view.ui.video
 		}
 		
 		public function set videoStream(value:NetStream):void {
-			netStream = value;
 			_video.attachNetStream(value);
+			scaleVideo(width, height);
 		}
 
-		public function set videoSize(size:Size):void {
-			_videoSize = size;
+		public function set metaDataVideoSize(size:Size):void {
+			_metaDataVideoSize = size;
 			scaleVideo(width, height);	
 		}
 		
@@ -45,10 +44,10 @@ package com.shen100.live.view.ui.video
 			var x:Number;
 			var y:Number;
 			var size:Size;
-			if(_videoSize) {
+			if(_metaDataVideoSize) {
 				switch(_videoScaleMode) {
 					case VideoScaleMode.FIT:{
-						size = Util.scaleToMax(_videoSize.width, _videoSize.height, width, height);
+						size = Util.scaleToMax(_metaDataVideoSize.width, _metaDataVideoSize.height, width, height);
 						x = (width - size.width) / 2;
 						y = (height - size.height) / 2;
 						break;
@@ -59,7 +58,7 @@ package com.shen100.live.view.ui.video
 						break;	
 					}
 					case VideoScaleMode.CLIP:{
-						size = Util.scaleToClip(_videoSize.width, _videoSize.height, width, height);
+						size = Util.scaleToClip(_metaDataVideoSize.width, _metaDataVideoSize.height, width, height);
 						x = (width - size.width) / 2;
 						y = (height - size.height) / 2;
 						break;

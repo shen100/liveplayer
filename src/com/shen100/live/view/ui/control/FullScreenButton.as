@@ -14,6 +14,7 @@ package com.shen100.live.view.ui.control
 		}
 		
 		private function onAddedToStage(event:Event):void {
+			removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			stage.addEventListener(FullScreenEvent.FULL_SCREEN, onFullScreen);		
 		}
 		

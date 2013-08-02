@@ -3,7 +3,6 @@ package com.shen100.live.managers
 	import com.shen100.live.events.MouseSleepEvent;
 	
 	import flash.display.DisplayObject;
-	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.utils.clearTimeout;
 	import flash.utils.getTimer;
@@ -28,7 +27,7 @@ package com.shen100.live.managers
 			timeoutId = setTimeout(onSleep, interval);
 		}
 		
-		private static function onMouseMove(event:Event):void {
+		private static function onMouseMove(event:MouseEvent):void {
 			var curTime:int = getTimer();
 			if(curTime - runtime >= interval) {
 				display.dispatchEvent(new MouseSleepEvent(MouseSleepEvent.WAKE));	

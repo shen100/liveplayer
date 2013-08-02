@@ -24,7 +24,7 @@ package com.shen100.live.view
 			addRightMenuItem(playerProxy.version);
 		}
 		
-		public function addRightMenuItem(text:String):void {
+		private function addRightMenuItem(text:String):void {
 			var menu:ContextMenu = app.contextMenu;
 			if(!menu) {
 				menu = new ContextMenu();

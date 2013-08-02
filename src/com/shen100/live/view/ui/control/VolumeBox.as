@@ -1,17 +1,15 @@
 package com.shen100.live.view.ui.control
 {	
-	import com.shen100.live.view.skin.VolumeIconSkin;
 	import com.shen.uicomps.components.Button;
 	import com.shen.uicomps.components.SkinnableComponent;
 	import com.shen.uicomps.components.skin.ButtonSkin;
 	import com.shen.uicomps.components.skin.Skin;
+	import com.shen100.live.view.skin.VolumeIconSkin;
 	
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
-	
-	import caurina.transitions.Tweener;
 	
 	public class VolumeBox extends Sprite {
 		
@@ -53,7 +51,7 @@ package com.shen100.live.view.ui.control
 			thumb.x = track.x;
 			thumb.y = (background.height - thumb.height) / 2;
 		
-			thumb.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDownThumb);
+			thumb.addEventListener(MouseEvent.MOUSE_DOWN, 	onMouseDownThumb);
 			track.addEventListener(MouseEvent.CLICK,		onTrackClick);
 			volumeIcon.addEventListener(MouseEvent.CLICK,	onVolumeIconClick);
 		}
@@ -79,8 +77,7 @@ package com.shen100.live.view.ui.control
 				theX = track.x + track.width - thumb.width;	
 			}
 			var theVolume:Number = (theX - track.x) / (track.width - thumb.width);
-			value = theVolume; 
-			Tweener.addTween(thumb, {x:theX, time:0.3});
+			value = theVolume;
 			var e:Event = new Event(VolumeBox.VOLUME_CHANGED);
 			dispatchEvent(e);
 		}
@@ -116,6 +113,9 @@ package com.shen100.live.view.ui.control
 			}
 			_value = value;
 			thumb.x = track.x + (track.width - thumb.width) * value;
+			if(thumb.x > track.x + track.width - thumb.width) {
+				thumb.x = track.x + track.width - thumb.width;	
+			}
 			volumeIcon.volume = _value;
 		}
 	}

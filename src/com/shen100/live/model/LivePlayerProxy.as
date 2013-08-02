@@ -9,6 +9,7 @@ package com.shen100.live.model {
 	import flash.media.SoundTransform;
 	import flash.net.NetConnection;
 	import flash.net.NetStream;
+	import flash.utils.clearTimeout;
 	import flash.utils.setTimeout;
 	
 	import org.puremvc.as3.multicore.patterns.proxy.Proxy;
@@ -17,11 +18,6 @@ package com.shen100.live.model {
 		
 		public static const NAME:String = "LivePlayerProxy";
 		
-		private static const PLAYER_NAME:String 	= "LivePlayer";
-		private static const MAJOR:int 				= 1;
-		private static const MINOR:int 				= 1;
-		private static const REVISION:int 			= 3;
-		
 		public static const PLAYER_STATE_CHANGED:String 		= "playerStateChanged";
 		public static const VIDEO_INFO_RESULT:String 			= "videoInfoResult";
 		public static const VIDEO_INFO_FAULT:String 			= "videoInfoFault";
@@ -29,6 +25,11 @@ package com.shen100.live.model {
 		public static const VIDEO_META_DATA:String 				= "videoMetaData";
 //		public static const VIDEO_BUFFER_EMPTY:String 			= "videoBufferEmpty";
 //		public static const VIDEO_BUFFER_FULL:String 			= "videoBufferFull";
+		
+		private static const PLAYER_NAME:String 	= "LivePlayer";
+		private static const MAJOR:int 				= 1;
+		private static const MINOR:int 				= 1;
+		private static const REVISION:int 			= 4;
 		
 		public var debugServerUrl:String;
 		public var channel:String;	//频道id
@@ -40,7 +41,9 @@ package com.shen100.live.model {
 		
 		private var _conn:NetConnection;
 		private var _netStream:NetStream;
-		private var _reconnTime:Number = 5000;
+		private var _reconnTime:Number = 5000;	//断开连接时，5秒后重连
+		private var _timeoutTime:Number = 5000; //5秒钟还没连上，就认为超时
+		private var _timeoutId:uint;
 		private var _bufferTime:Number = 2;
 		private var _volume:Number = 1;
 		private var _metaData:Object;
@@ -56,8 +59,15 @@ package com.shen100.live.model {
 			httpService.send(url);
 		}
 		
+		/**
+		 *  {
+		 *    "Level":"1",
+		 *    "Gone":"137001",
+		 *    "Location":"http://61.147.115.150/broadcast/sub?channel=910&id=ku6_live",
+		 *    "MultiURL":"152001;http://183.60.130.140/broadcast/sub?channel=910&id=ku6_live|152002;http://183.60.130.261/broadcast/sub?channel=910&id=ku6_live"
+		 *  }
+		 */
 		public function onVideoInfoResult(data:Object):void {
-			//data = '{"Level":"1","Gone":"137001","Location":"http://61.147.115.150/broadcast/sub?channel=910&id=ku6_live","MultiURL":"152001;http://183.60.130.140/broadcast/sub?channel=910&id=ku6_live|152002;http://183.60.130.261/broadcast/sub?channel=910&id=ku6_live"}';    
 			index = 0;
 			videoInfoVec = new Vector.<VideoInfoVO>();
 			var result:Object = com.adobe.serialization.json.JSON.decode(data as String);
@@ -70,11 +80,11 @@ package com.shen100.live.model {
 			var backup:String = result.MultiURL;
 			if(backup) {
 				var backupArr:Array = backup.split("|");	
-				for each (var goneAndUrl:String in backupArr) {
-					var goneAndUrlArr:Array = goneAndUrl.split(";");
+				for each (var goneAndLocation:String in backupArr) {
+					var goneAndLocArr:Array = goneAndLocation.split(";");
 					videoInfoData = new Object();
-					videoInfoData.gone 		= goneAndUrlArr[0];
-					videoInfoData.location 	= debugServerUrl ? debugServerUrl : goneAndUrlArr[1];
+					videoInfoData.gone 		= goneAndLocArr[0];
+					videoInfoData.location 	= debugServerUrl ? debugServerUrl : goneAndLocArr[1];
 					videoInfo = new VideoInfoVO(videoInfoData);
 					videoInfoVec.push(videoInfo);
 				}
@@ -88,6 +98,7 @@ package com.shen100.live.model {
 		}
 		
 		public function play():void {
+			disconnect();
 			connect();	
 		}
 		
@@ -95,7 +106,8 @@ package com.shen100.live.model {
 			_conn = new NetConnection();
 			_conn.client = this;
 			_conn.addEventListener(NetStatusEvent.NET_STATUS, onNetConnStatus);
-			_conn.connect(connUrl);	
+			_timeoutId = setTimeout(reconnect, _timeoutTime);
+			_conn.connect(netConnUrl);	
 		}
 		
 		private function reconnect():void {
@@ -111,6 +123,7 @@ package com.shen100.live.model {
 			if(_conn) {
 				_conn.removeEventListener(NetStatusEvent.NET_STATUS, onNetConnStatus);
 				_conn.close();
+				_conn = null;
 			}
 			if(_netStream) {
 				_netStream.removeEventListener(NetStatusEvent.NET_STATUS, onStreamStatus);
@@ -125,12 +138,21 @@ package com.shen100.live.model {
 		
 		private function onNetConnStatus(event:NetStatusEvent):void {
 			trace(event.info.code);
+			if(_timeoutId) {
+				clearTimeout(_timeoutId);
+			}
 			switch( event.info.code ) {
 				case "NetConnection.Connect.Success": {
 					_netStream = new NetStream(_conn);
-					_netStream.bufferTime = _bufferTime;
+					if(this.protocol == VideoInfoVO.HTTP) {
+						_netStream.bufferTime = _bufferTime;	
+					}else {
+						_netStream.bufferTime = 0;	
+					}
 					_netStream.client = this;
+					volume = _volume;
 					_netStream.addEventListener(NetStatusEvent.NET_STATUS, onStreamStatus);
+					_timeoutId = setTimeout(reconnect, _timeoutTime);
 					_netStream.play(streamPath);
 					sendNotification(LivePlayerProxy.VIDEO_CONNECT_SUCCESS);
 					break;	
@@ -153,6 +175,9 @@ package com.shen100.live.model {
 		
 		private function onStreamStatus(event:NetStatusEvent):void {
 			trace(event.info.code);
+			if(_timeoutId) {
+				clearTimeout(_timeoutId);
+			}
 			switch( event.info.code ) {
 				case "NetStream.Play.StreamNotFound": {
 					reconnect();
@@ -161,20 +186,19 @@ package com.shen100.live.model {
 			}
 		}
 	
-		private function get connUrl():String {
-			return videoInfoVec[index].connUrl;
+		private function get protocol():String {
+			return videoInfoVec[index].protocol;
+		}
+		
+		private function get netConnUrl():String {
+			return videoInfoVec[index].netConnUrl;
 		}
 		
 		private function get streamPath():String {
 			return videoInfoVec[index].streamPath;
 		}
-		
-		private function get protocol():String {
-			return videoInfoVec[index].protocol;
-		}
-		
+
 		public function pause():void {
-			trace("pause");
 			_netStream.pause();	
 		}
 		

@@ -3,10 +3,7 @@ package com.shen100.live.view
 	import com.shen.core.geom.Size;
 	import com.shen100.live.model.LayoutProxy;
 	import com.shen100.live.model.LivePlayerProxy;
-	import com.shen100.live.model.constant.PlayerState;
 	import com.shen100.live.view.ui.video.VideoBox;
-	
-	import flash.utils.Timer;
 	
 	import org.puremvc.as3.multicore.interfaces.IMediator;
 	import org.puremvc.as3.multicore.interfaces.INotification;
@@ -18,8 +15,6 @@ package com.shen100.live.view
 	
 		private var layoutProxy:LayoutProxy;
 		private var playerProxy:LivePlayerProxy;
-		
-		private var bufferTimer:Timer;
 		
 		public function VideoBoxMediator(viewComponent:VideoBox) {
 			super(NAME, viewComponent);	
@@ -33,9 +28,8 @@ package com.shen100.live.view
 		
 		override public function listNotificationInterests():Array {
 			return [
-						LivePlayerProxy.VIDEO_INFO_RESULT,
-						LivePlayerProxy.VIDEO_META_DATA,
-						LivePlayerProxy.VIDEO_CONNECT_SUCCESS
+						LivePlayerProxy.VIDEO_CONNECT_SUCCESS,
+						LivePlayerProxy.VIDEO_META_DATA
 //						LivePlayerProxy.VIDEO_BUFFER_EMPTY,
 //						LivePlayerProxy.VIDEO_BUFFER_FULL,
 				];
@@ -44,11 +38,11 @@ package com.shen100.live.view
 		override public function handleNotification(note:INotification):void {
 			switch(note.getName()) {
 				case LivePlayerProxy.VIDEO_CONNECT_SUCCESS: {
-						videoBox.videoStream = playerProxy.netStream;
+					videoBox.videoStream = playerProxy.netStream;
 					break;
 				}
 				case LivePlayerProxy.VIDEO_META_DATA: {
-					videoBox.videoSize = new Size(playerProxy.videoWidth, playerProxy.videoHeight);
+					videoBox.metaDataVideoSize = new Size(playerProxy.videoWidth, playerProxy.videoHeight);
 					break;
 				}
 //				case LivePlayerProxy.VIDEO_BUFFER_EMPTY: {
