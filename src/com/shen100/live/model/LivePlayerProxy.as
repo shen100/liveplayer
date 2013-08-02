@@ -29,7 +29,7 @@ package com.shen100.live.model {
 		private static const PLAYER_NAME:String 	= "LivePlayer";
 		private static const MAJOR:int 				= 1;
 		private static const MINOR:int 				= 1;
-		private static const REVISION:int 			= 4;
+		private static const REVISION:int 			= 5;
 		
 		public var debugServerUrl:String;
 		public var channel:String;	//频道id
@@ -234,11 +234,11 @@ package com.shen100.live.model {
 			return _playerState;
 		}
 		
-		public function get videoWidth():Number {
+		public function get metaDataWidth():Number {
 			return _metaData ? _metaData.width : 0;
 		}
 		
-		public function get videoHeight():Number {
+		public function get metaDataHeight():Number {
 			return _metaData ? _metaData.height : 0;
 		}
 		

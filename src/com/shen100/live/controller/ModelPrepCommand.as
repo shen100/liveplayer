@@ -1,5 +1,6 @@
 package com.shen100.live.controller
 {
+	import com.shen.core.geom.Size;
 	import com.shen100.live.model.LayoutProxy;
 	import com.shen100.live.model.LivePlayerProxy;
 	import com.shen100.live.model.SystemProxy;
@@ -30,6 +31,7 @@ package com.shen100.live.controller
 			layoutProxy.videoScaleMode 	= data.scaleMode == "clip"    ? VideoScaleMode.CLIP
 										    : (data.scaleMode == "fill" ? VideoScaleMode.FILL 
 										    : VideoScaleMode.FIT);
+			layoutProxy.aspectRatio		= data.wRatio && data.hRatio ? new Size(data.wRatio, data.hRatio) : null;
 			systemProxy.flashVersion 	= Capabilities.version;
 			systemProxy.ifDebug 		= data.ifDebug	== "1" ? true : false;
 		}

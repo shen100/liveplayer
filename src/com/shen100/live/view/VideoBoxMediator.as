@@ -24,6 +24,7 @@ package com.shen100.live.view
 			layoutProxy  = facade.retrieveProxy(LayoutProxy.NAME) 		as LayoutProxy;
 			playerProxy  = facade.retrieveProxy(LivePlayerProxy.NAME) 	as LivePlayerProxy;
 			videoBox.videoScaleMode = layoutProxy.videoScaleMode;
+			videoBox.aspectRatio	= layoutProxy.aspectRatio;
 		}
 		
 		override public function listNotificationInterests():Array {
@@ -42,7 +43,7 @@ package com.shen100.live.view
 					break;
 				}
 				case LivePlayerProxy.VIDEO_META_DATA: {
-					videoBox.metaDataVideoSize = new Size(playerProxy.videoWidth, playerProxy.videoHeight);
+					videoBox.metaDataVideoSize = new Size(playerProxy.metaDataWidth, playerProxy.metaDataHeight);         
 					break;
 				}
 //				case LivePlayerProxy.VIDEO_BUFFER_EMPTY: {

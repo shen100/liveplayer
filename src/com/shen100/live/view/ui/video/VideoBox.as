@@ -16,6 +16,7 @@ package com.shen100.live.view.ui.video
 		private var _video:Video;
 		private var _metaDataVideoSize:Size;
 		private var _videoScaleMode:String;
+		private var _aspectRatio:Size;	//页面设置的视频宽高比
 		
 		public function VideoBox() {
 			bg = new Shape();
@@ -24,56 +25,65 @@ package com.shen100.live.view.ui.video
 			_video.smoothing = true;
 			addChild(_video);
 		}
-		
-		public function set videoStream(value:NetStream):void {
-			_video.attachNetStream(value);
-			scaleVideo(width, height);
-		}
 
-		public function set metaDataVideoSize(size:Size):void {
-			_metaDataVideoSize = size;
-			scaleVideo(width, height);	
+		public function set aspectRatio(size:Size):void {
+			_aspectRatio = size;
+			scaleVideo(width, height);
 		}
 		
 		public function set videoScaleMode(value:String):void {
 			_videoScaleMode = value;
 			scaleVideo(width, height);
 		}
+		
+		public function set videoStream(value:NetStream):void {
+			_video.attachNetStream(value);
+			scaleVideo(width, height);
+		}
+		
+		public function set metaDataVideoSize(size:Size):void {
+			_metaDataVideoSize = size;
+			scaleVideo(width, height);	
+		}
 
 		private function scaleVideo(width:Number, height:Number):void {
 			var x:Number;
 			var y:Number;
 			var size:Size;
-			if(_metaDataVideoSize) {
-				switch(_videoScaleMode) {
-					case VideoScaleMode.FIT:{
-						size = Util.scaleToMax(_metaDataVideoSize.width, _metaDataVideoSize.height, width, height);
-						x = (width - size.width) / 2;
-						y = (height - size.height) / 2;
-						break;
-					}
-					case VideoScaleMode.FILL:{
-						x = y = 0;
-						size = new Size(width, height);
-						break;	
-					}
-					case VideoScaleMode.CLIP:{
-						size = Util.scaleToClip(_metaDataVideoSize.width, _metaDataVideoSize.height, width, height);
-						x = (width - size.width) / 2;
-						y = (height - size.height) / 2;
-						break;
-					}
-				}
-				_video.width = size.width;
-				_video.height = size.height;
-				_video.x = x;
-				_video.y = y;
+			var theSize:Size;
+			if(_aspectRatio) {
+				theSize = _aspectRatio;
+			}else if(_metaDataVideoSize) {
+				theSize = _metaDataVideoSize;	
 			}else {
-				_video.width = width;
-				_video.height = height;
-				_video.x = 0;
-				_video.y = 0;	
+				theSize = new Size(width, height);	
 			}
+			if(!_videoScaleMode) {
+				return;
+			}
+			switch(_videoScaleMode) {
+				case VideoScaleMode.FIT:{
+					size = Util.scaleToMax(theSize.width, theSize.height, width, height);
+					x = (width - size.width) / 2;
+					y = (height - size.height) / 2;
+					break;
+				}
+				case VideoScaleMode.FILL:{
+					x = y = 0;
+					size = new Size(width, height);
+					break;	
+				}
+				case VideoScaleMode.CLIP:{
+					size = Util.scaleToClip(theSize.width, theSize.height, width, height);
+					x = (width - size.width) / 2;
+					y = (height - size.height) / 2;
+					break;
+				}
+			}
+			_video.width = size.width;
+			_video.height = size.height;
+			_video.x = x;
+			_video.y = y;
 		}
 		
 		private function drawBackground(width:Number, height:Number):void {
